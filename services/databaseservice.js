@@ -22,27 +22,33 @@ exports.init = function(done)
 					console.log("Error running query!");
 					return;
 				}
+				_res.write("[");
 				for (var i = 0; i < results.rows.length; i++) {
 					var item = {};
 					item.name = results.rows[i][0];
 					item.id = results.rows[i][1];
 					item.cdcenabled = results.rows[i][2];
 					_res.write(JSON.stringify(item));
+					if(i != results.rows.length - 1)
+					{
+						_res.write(",");
+					}
 				}
-				_res.end();
+				_res.end("]");
 			});
 		});
 	}
 
 	var router = new director.http.Router({
-		'/databases' : { get : databaselist }
+		'/services/databases' : { get : databaselist }
 	});
 
 	var server = http.createServer(function(req, res){
+		req.url = req.url.replace("//", "/services/");
 		router.dispatch(req, res, function(err) {
 			if(err) {
 				res.writeHead(404);
-				res.end();
+				res.end(JSON.stringify(err) + '\n' + JSON.stringify(router));
 			}
 		});
 
