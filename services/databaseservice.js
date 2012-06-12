@@ -22,15 +22,14 @@ exports.init = function(done)
 					console.log("Error running query!");
 					return;
 				}
-				var items = [];
 				for (var i = 0; i < results.rows.length; i++) {
 					var item = {};
 					item.name = results.rows[i][0];
 					item.id = results.rows[i][1];
 					item.cdcenabled = results.rows[i][2];
-					items.push(item);
+					_res.write(JSON.stringify(item));
 				}
-				_res.end(JSON.stringify(items));
+				_res.end();
 			});
 		});
 	}
