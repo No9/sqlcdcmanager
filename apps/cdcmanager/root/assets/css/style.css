@@ -1,0 +1,8 @@
+ul { list-style: circle; }
+
+.name { width : 200px; }
+.tablename { width : 200px; }
+.create_date { width : 200px; }
+.modify_date { width : 200px; }
+.is_tracked_by_cdc { width : 200px; }
+.type_desc { width : 200px; }

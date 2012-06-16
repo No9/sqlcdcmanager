@@ -1,39 +1,8 @@
 <html>
 <head>
-<script type="text/javascript" src="config/assets/js/client.js"></script>
-<script type="text/javascript" src="config/assets/js/json2.js"></script>
-<script type="text/javascript" src="config/assets/js/plates.js"></script>
+<link rel="stylesheet" type="text/css" href="/config/assets/css/style.css" />
 </head>
 <body>
-<h1>Databases</h1>
-<div id="databaselist"></div>
-<script>
-	var httpmenu = new XMLHttpRequest();
-		httpmenu.open("GET", "/services/databases", true);
-		httpmenu.onreadystatechange = function() {
-			if(httpmenu.readyState == 4 && httpmenu.status == 200) {
-				//var html = '<div class="menuitem" id="/" onclick="menuclick(this)"></div>';
-				var html = '<div class="cdcenabled"></div><div class="id"></div><div class="name"></div>';
-				var data = JSON.parse(httpmenu.responseText);
-				var output = Plates.bind(html, data);
-				
-				document.getElementById('databaselist').innerHTML = output;
-				
-				/*
-				var html = '<li class="single-link" id="/" onclick="menuclick(this)"></li>';
-				
-				var map = Plates.Map();
-				map.cls('single-link').to('displaytext');
-				map.where('id').is('/').insert('id');
-				var output = Plates.bind(html, data, map);
-				
-				document.getElementById('menu').innerHTML = output;
-				*/
-			}
-		}
-		httpmenu.send();
-</script>
-
-
+<div><a href="index.html">Home</a><a href="databases.html">Databases</a></div>
 </body>
 </html>

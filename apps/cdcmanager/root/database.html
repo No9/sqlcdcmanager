@@ -1,0 +1,64 @@
+<html>
+<head>
+<title>Database</title>
+<script type="text/javascript" src="/config/assets/js/client.js"></script>
+<script type="text/javascript" src="/config/assets/js/json2.js"></script>
+<script type="text/javascript" src="/config/assets/js/plates.js"></script>
+<link rel="stylesheet" type="text/css" href="/config/assets/css/style.css" />
+</head>
+<body>
+<div><a href="index.html">Home</a><a href="databases.html">Databases</a></div>
+<h1 id="title"></h1>
+<!--
+USE AdventureWorks 
+GO 
+EXEC sys.sp_cdc_enable_table 
+@source_schema = N'HumanResources', 
+@source_name   = N'Shift', 
+@role_name     = NULL 
+GO
+-->
+<div id="databaselist">
+	<div>
+	    <span class="name">Schema</span>
+		<span class="tablename">Name</span>
+		<span class="create_date">Created</span>
+		<span class="modify_date">Modified</span>
+		<span class="is_tracked_by_cdc">Tracked</span>
+		<span class="type_desc">Description</span>
+	</div>
+</div>
+<script>
+    document.getElementById("title").innerHTML = getQueryString()["name"];
+	var httpmenu = new XMLHttpRequest();
+		httpmenu.open("GET", "/services/databases/" + getQueryString()["name"], true);
+		httpmenu.onreadystatechange = function() {
+			if(httpmenu.readyState == 4 && httpmenu.status == 200) {
+				var html = '<div onclick="alert(this.innerHTML)">' +
+							   '<span class="name"></span>' +
+							   '<span class="tablename"></span>' +
+							   '<span class="create_date"></span>' +
+							   '<span class="modify_date"></span>' +
+							   '<span class="is_tracked_by_cdc"></span>' +
+							   '<span class="type_desc"></span>' +
+							 '</div>';
+				var data = JSON.parse(httpmenu.responseText);
+				var output = Plates.bind(html, data);
+				var header = document.getElementById('databaselist').innerHTML;
+				
+				document.getElementById('databaselist').innerHTML = header + output;
+			}
+		}
+		httpmenu.send();
+		
+/*
+tablename = results.rows[i][1];
+					item.create_date = results.rows[i][2];
+					item.modify_date = results.rows[i][3];
+					item.is_tracked_by_cdc = results.rows[i][4];
+					item.type_desc = results.rows[i][5];*/
+</script>
+
+
+</body>
+</html>

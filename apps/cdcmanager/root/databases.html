@@ -1,0 +1,50 @@
+<html>
+<head>
+<script type="text/javascript" src="/config/assets/js/client.js"></script>
+<script type="text/javascript" src="/config/assets/js/json2.js"></script>
+<script type="text/javascript" src="/config/assets/js/plates.js"></script>
+<link rel="stylesheet" type="text/css" href="/config/assets/css/style.css" />
+</head>
+<body>
+<div><a href="index.html">Home</a><a href="databases.html">Databases</a></div>
+<h1>Databases</h1>
+	<div id="databaselist">
+	<div>
+		<span>Name</span>
+	</div>
+	</div>
+<script>
+	var httpmenu = new XMLHttpRequest();
+		httpmenu.open("GET", "/services/databases", true);
+		httpmenu.onreadystatechange = function() {
+			if(httpmenu.readyState == 4 && httpmenu.status == 200) {
+				//var html = '<div class="menuitem" id="/" onclick="menuclick(this)"></div>';
+				//var html = '<li><a href="/"><span class="cdcenabled"></span><span class="id"></span><span class="name"></span></a></li>';
+				var html = '<div><span><a href="/"><span class="name"></a></span></div>';
+							 
+				var data = JSON.parse(httpmenu.responseText);
+				var map = Plates.Map();
+				map.cls('name').to('name');
+				map.where('href').is('/').insert('location');
+				var output = Plates.bind(html, data, map);
+				var header = document.getElementById('databaselist').innerHTML;
+				document.getElementById('databaselist').innerHTML = header + output;
+				
+				/*
+				var html = '<li class="single-link" id="/" onclick="menuclick(this)"></li>';
+				
+				var map = Plates.Map();
+				map.cls('single-link').to('displaytext');
+				map.where('id').is('/').insert('id');
+				var output = Plates.bind(html, data, map);
+				
+				document.getElementById('menu').innerHTML = output;
+				*/
+			}
+		}
+		httpmenu.send();
+</script>
+
+
+</body>
+</html>
