@@ -8,8 +8,6 @@ exports.init = function(done)
 	
 	function databaselist(route)
 	{
-		
-		
 		var conn_str = "Driver={SQL Server Native Client 11.0};Server=(local);Database=master;Trusted_Connection={Yes}";
 		var databasecdc = "SELECT [name], database_id, is_cdc_enabled  FROM sys.databases"; 
 		var _res = this.res;
@@ -47,7 +45,7 @@ exports.init = function(done)
 	
 	function database(route){
 	    var parts = url.parse(this.req.url);
-		console.log(parts);
+		console.log('GET DATABASE TABLES');
 		var pathbits = parts.path.split("/"); 
 		var dbname = pathbits.pop();
 		var conn_str = "Driver={SQL Server Native Client 11.0};Server=(local);Database=" + dbname + ";Trusted_Connection={Yes}";
@@ -89,36 +87,51 @@ exports.init = function(done)
 		});
 	}
 	
-	function updatetable(route)
+	function updatetable(res, data)
 	{
+		//TODO: Execute Procedure
+		console.log('POST TABLE UPDATE');
 	    var dbname = ''
 		var conn_str = "Driver={SQL Server Native Client 11.0};Server=(local);Database=" + dbname + ";Trusted_Connection={Yes}";
 		var databasecdc = "EXEC sys.sp_cdc_enable_table "; 
-						  
+		res.writeHead(200, { 'Content-Type': 'application/json' })
+		res.end(data);
+		//this.res.end(JSON.stringify(this.req.body));
 	/*
 	EXEC sys.sp_cdc_enable_table 
 @source_schema = N'HumanResources', 
 @source_name   = N'Shift', 
 @role_name     = NULL 
 	*/
-		console.log(this.req);
+		//console.log(this.req.body);
 	}
 	
 	var router = new director.http.Router({
 		'/services/databases' : { get : databaselist },
-		'/services/databases/*' : { get : database },
-		'/services/database/table' : { post : updatetable }
+		'/services/databases/*' : { get : database }
 	});
 
 	var server = http.createServer(function(req, res){
+		
 		req.url = req.url.replace("//", "/services/");
+		if (req.method == 'POST') {
+			var chunks = [];
+			req.on('data', function(chunk){
+				console.log("DATA: " + chunk.toString());
+				chunks.push(chunk);
+			});
+			req.on('end', function(){
+				console.log(chunks.toString());
+				updatetable(res, chunks.toString()); 
+			});
+		}else{
 		router.dispatch(req, res, function(err) {
 			if(err) {
 				res.writeHead(404);
 				res.end(JSON.stringify(err) + '\n' + JSON.stringify(router));
-			}
-		});
-
+				}
+			});
+		}
 	});
 
 	server.listen(8000);

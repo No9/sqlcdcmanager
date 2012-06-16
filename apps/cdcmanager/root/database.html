@@ -7,7 +7,7 @@
 <link rel="stylesheet" type="text/css" href="/config/assets/css/style.css" />
 </head>
 <body>
-<div><a href="index.html">Home</a><a href="databases.html">Databases</a></div>
+<div><a href="/config/index.html">Home</a><a href="/config/databases.html">Databases</a></div>
 <h1 id="title"></h1>
 <!--
 USE AdventureWorks 
@@ -34,7 +34,7 @@ GO
 		httpmenu.open("GET", "/services/databases/" + getQueryString()["name"], true);
 		httpmenu.onreadystatechange = function() {
 			if(httpmenu.readyState == 4 && httpmenu.status == 200) {
-				var html = '<div onclick="alert(this.innerHTML)">' +
+				var html = '<div onclick="enabletable(this)">' +
 							   '<span class="name"></span>' +
 							   '<span class="tablename"></span>' +
 							   '<span class="create_date"></span>' +
@@ -45,12 +45,39 @@ GO
 				var data = JSON.parse(httpmenu.responseText);
 				var output = Plates.bind(html, data);
 				var header = document.getElementById('databaselist').innerHTML;
-				
+				console.log(data);
 				document.getElementById('databaselist').innerHTML = header + output;
 			}
 		}
 		httpmenu.send();
 		
+		function enabletable(row){
+			var data = row.getElementsByTagName('*');
+			var request = {};
+			
+			request.schema = data[0].innerHTML; 
+			request.tablename = data[1].innerHTML;
+			request.role = ''; //Leaving this empty for now
+			if(data[4].innerHTML == '')
+				request.status = true;
+			else
+				request.status = false;
+				
+			var requeststring = JSON.stringify(request);
+			
+			
+			var enabletablerequest = new XMLHttpRequest();
+			enabletablerequest.open("POST", "/services/databases/" + getQueryString()["name"], true);
+			enabletablerequest.setRequestHeader("Content-type","application/json");
+			
+			enabletablerequest.onreadystatechange = function() {
+					if(enabletablerequest.readyState == 4 && enabletablerequest.status == 200) {
+						//var data = JSON.parse(enabletablerequest.responseText);
+						console.log(enabletablerequest.responseText);
+					}
+			}
+			enabletablerequest.send(requeststring);
+		}
 /*
 tablename = results.rows[i][1];
 					item.create_date = results.rows[i][2];
