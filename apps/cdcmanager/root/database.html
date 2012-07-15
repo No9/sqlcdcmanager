@@ -3,12 +3,45 @@
 <title>Database</title>
 <script type="text/javascript" src="/config/assets/js/client.js"></script>
 <script type="text/javascript" src="/config/assets/js/json2.js"></script>
-<script type="text/javascript" src="/config/assets/js/plates.js"></script>
+<script type="text/javascript" src="/config/assets/js/handlebars.js"></script>
 <link rel="stylesheet" type="text/css" href="/config/assets/css/style.css" />
 </head>
 <body>
+<script id="title-template" type="text/x-handlebars-template">
+<table>
+		<tr>
+			<td><h1 id="title">{{title}}</h1></td>
+			<td class="rowimagecell"><img src="/config/assets/images/enabled{{enabled}}.png" /></td>
+		</tr>
+</table>
+</script>
+<script id="databaselist-template">
+	<table>
+			<tr>
+				<td class="heading">Schema</td>
+				<td class="heading">Name</td>
+				<td class="heading">Created</td>
+				<td class="heading">Modified</td>
+				<td class="heading">Tracked</td>
+				<td class="heading">Description</td>
+			</tr>
+		{{#each table}}
+			<tr onclick="toggleTable(this)">
+				<td class="name">{{name}}</td>
+				<td class="tablename">{{tablename}}</td>
+				<td class="create_date">{{create_date}}</td>
+				<td class="modify_date">{{modify_date}}</td>
+				<td class="is_tracked_by_cdc" data-istracked="{{is_tracked_by_cdc}}"><img src="/config/assets/images/enabled{{is_tracked_by_cdc}}.png" class="rowicon" /></td>
+				<td class="type_desc">{{type_desc}}</td>
+			</tr>
+		{{/each}}
+	</table>
+	
+</script>
 <div><a href="/config/index.html">Home</a><a href="/config/databases.html">Databases</a></div>
-<h1 id="title"></h1>
+<div id="title" title="Click To Toggle CDC Status"></div>
+<div id="databaselist"></div>
+
 <!--
 USE AdventureWorks 
 GO 
@@ -18,17 +51,116 @@ EXEC sys.sp_cdc_enable_table
 @role_name     = NULL 
 GO
 -->
-<div id="databaselist">
-	<div>
-	    <span class="name">Schema</span>
-		<span class="tablename">Name</span>
-		<span class="create_date">Created</span>
-		<span class="modify_date">Modified</span>
-		<span class="is_tracked_by_cdc">Tracked</span>
-		<span class="type_desc">Description</span>
-	</div>
-</div>
+	
+
+
 <script>
+	var source   = document.getElementById("title-template").innerHTML;
+	var template = Handlebars.compile(source);
+	var titledata = { };
+	titledata.title = getQueryString()["name"];
+	titledata.enabled = getQueryString()["enabled"];
+	rendertitle();
+	loadtables();
+	
+	function rendertitle()
+	{
+		var html = template(titledata);			 
+		var titleelement = document.getElementById('title');
+		titleelement.innerHTML =  html;
+		titleelement.onclick = clickTitle;
+	}
+	
+	
+	
+	function clickTitle(){
+		if(titledata.enabled == "0"){
+			if(confirm("Would like to enable " + titledata.title)){
+				toggledatabasestatus(titledata.title, "1", function(retVal){
+					titledata.enabled = retVal;
+					rendertitle();
+					loadtables();
+				});				
+			}
+		}else{
+			if(confirm("Would like to disable " + titledata.title)){
+				toggledatabasestatus(titledata.title, "0", function(retVal){
+					titledata.enabled = retVal;
+					rendertitle();
+					loadtables();
+				});
+			}
+		}
+	}
+	function loadtables(){
+	var httpmenu = new XMLHttpRequest();
+		httpmenu.open("GET", "/services/databases/" + getQueryString()["name"], true);
+		httpmenu.onreadystatechange = function() {
+			if(httpmenu.readyState == 4 && httpmenu.status == 200) {
+				var source   = document.getElementById("databaselist-template").innerHTML;
+				var template = Handlebars.compile(source);
+				var data = JSON.parse(httpmenu.responseText);
+				var tables = { table : data } ;
+				var html    = template(tables);			 
+				document.getElementById('databaselist').innerHTML =  html;
+			}
+		}
+		httpmenu.send();
+	}
+</script>
+
+<script>
+
+	function toggleTable(row){
+			
+			
+			var data = row.getElementsByTagName('*');
+			var request = {};
+			request.type = "tablestatusupdate";
+			request.databasename = getQueryString()["name"];
+			request.schema = data[0].innerHTML; 
+			request.tablename = data[1].innerHTML;
+			request.role = ''; //Leaving this empty for now
+			
+			if(request.schema == "cdc")
+			{
+				alert("You cannot enable Change Data Capture on cdc schema object : " + request.tablename)
+				return;
+			}
+			
+			if(data[4].getAttribute('data-istracked') == '0'){
+				request.status = "1";
+				if(!confirm("Would you like enable " + request.tablename + "?"))
+					return;
+			}
+			else{
+				if(!confirm("Would you like disable " + request.tablename + "?"))
+					return;
+				request.status = "0";
+			}
+			
+			var requeststring = JSON.stringify(request);
+			
+			console.log(requeststring);
+			
+			var enabletablerequest = new XMLHttpRequest();
+			enabletablerequest.open("POST", "/services/databases/" + getQueryString()["name"], true);
+			enabletablerequest.setRequestHeader("Content-type","application/json");
+			
+			enabletablerequest.onreadystatechange = function() {
+					if(enabletablerequest.readyState == 4 && enabletablerequest.status == 200) {
+						//var data = JSON.parse(enabletablerequest.responseText);
+						console.log(enabletablerequest.responseText);
+						loadtables();
+					}
+			}
+			enabletablerequest.send(requeststring);
+			
+	}
+
+/*
+	
+	title-template
     document.getElementById("title").innerHTML = getQueryString()["name"];
 	var httpmenu = new XMLHttpRequest();
 		httpmenu.open("GET", "/services/databases/" + getQueryString()["name"], true);

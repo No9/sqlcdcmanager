@@ -53,7 +53,6 @@ exports.init = function(done)
 						  + "FROM sys.schemas INNER JOIN "
                           + "sys.tables ON sys.schemas.schema_id = sys.tables.schema_id"; 
 		var _res = this.res;
-		
 		sql.open(conn_str, function (err, conn) {
 			if (err) {
 				_res.writeHead(500, { 'Content-Type': 'application/json' })
@@ -87,23 +86,59 @@ exports.init = function(done)
 		});
 	}
 	
-	function updatetable(res, data)
+	
+	
+	function updatedatabase(_res, data)
 	{
-		//TODO: Execute Procedure
-		console.log('POST TABLE UPDATE');
-	    var dbname = ''
+		console.log('POST database update');
+		var reqobject = JSON.parse(data);
+	    var dbname = reqobject.databasename;
+		var status = reqobject.status;
+		var reqtype = reqobject.type;
+		
+		console.log('database name: ' + dbname);
 		var conn_str = "Driver={SQL Server Native Client 11.0};Server=(local);Database=" + dbname + ";Trusted_Connection={Yes}";
-		var databasecdc = "EXEC sys.sp_cdc_enable_table "; 
-		res.writeHead(200, { 'Content-Type': 'application/json' })
-		res.end(data);
-		//this.res.end(JSON.stringify(this.req.body));
-	/*
-	EXEC sys.sp_cdc_enable_table 
-@source_schema = N'HumanResources', 
-@source_name   = N'Shift', 
-@role_name     = NULL 
-	*/
-		//console.log(this.req.body);
+		var databasecdc = "";
+		
+		if(reqtype == "databasestatusupdate"){		
+			if(status == "1"){
+				databasecdc = "EXEC sys.sp_cdc_enable_db"; 
+			}else{
+				databasecdc = "EXEC sys.sp_cdc_disable_db ";
+			}
+		}else{
+				console.log('updating table : ' + reqobject.schema + " : " + reqobject.tablename);
+		
+			if(status == "1"){
+					//{"type":"tablestatusupdate","databasename":"nodejstest","schema":"dbo","tablename":"TestTable1","role":"","status":"1"} 
+					databasecdc = "EXEC sys.sp_cdc_enable_table " ;
+					databasecdc += "@source_schema = N'" + reqobject.schema + "',"; 
+					databasecdc += "@source_name   = N'" + reqobject.tablename + "',"; 
+					databasecdc += "@role_name     = NULL";
+			}else{
+					databasecdc = "EXECUTE sys.sp_cdc_disable_table ";
+					databasecdc += "@source_schema = N'" + reqobject.schema + "',";
+					databasecdc += "@source_name = N'" + reqobject.tablename + "',"; 
+					databasecdc += "@capture_instance = N'" + reqobject.schema + "_" + reqobject.tablename + "'";
+			}
+		}
+		
+		sql.open(conn_str, function (err, conn) {
+			if (err) {
+				_res.writeHead(500, { 'Content-Type': 'application/json' })
+				_res.end("Error opening the connection!");
+				return;
+			}
+			conn.queryRaw(databasecdc, function (err, results) {
+				if (err) {
+					_res.writeHead(500, { 'Content-Type': 'application/json' })
+					_res.end("Error running query!");
+					return;
+				}
+				_res.writeHead(200, { 'Content-Type': 'application/json' })
+				_res.end(status);
+			});
+		});
 	}
 	
 	var router = new director.http.Router({
@@ -122,7 +157,7 @@ exports.init = function(done)
 			});
 			req.on('end', function(){
 				console.log(chunks.toString());
-				updatetable(res, chunks.toString()); 
+				updatedatabase(res, chunks.toString()); 
 			});
 		}else{
 		router.dispatch(req, res, function(err) {

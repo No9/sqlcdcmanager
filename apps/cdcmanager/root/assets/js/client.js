@@ -22,3 +22,28 @@ function getQueryString() {
 
   return result;
 }
+
+function toggletablestatus(databasename, tablename, status, cb){
+	
+}
+
+function toggledatabasestatus(databasename, status, cb){
+	
+		var request = {};
+			request.databasename = databasename; 
+			request.status = status; 
+			request.type = "databasestatusupdate";
+			
+		var requeststring = JSON.stringify(request);
+			
+		var databasestatusrequest = new XMLHttpRequest();
+			databasestatusrequest.open("POST", "/services/databases/" + getQueryString()["name"], true);
+			databasestatusrequest.setRequestHeader("Content-type","application/json");
+			
+			databasestatusrequest.onreadystatechange = function() {
+					if(databasestatusrequest.readyState == 4 && databasestatusrequest.status == 200) {
+					    cb(databasestatusrequest.responseText)
+					}
+			}
+			databasestatusrequest.send(requeststring);
+}

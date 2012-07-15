@@ -1,31 +1,7 @@
+body { font-family: Arial, Helvetica, sans-serif; padding : 15px;}
 ul { list-style: circle; }
-
-.name 
-{ 
-		width : 200px;
-		display:inline-block;
-}
-.tablename { 
-	width : 200px; 
-	display:inline-block;
-}
-.create_date 
-{ 
-	width : 200px;
-	display:inline-block;
-}
-.modify_date 
-{ 
-	width : 200px; 
-	display:inline-block;
-}
-.is_tracked_by_cdc 
-{ 
-	width : 200px; 
-	display:inline-block;
-}
-.type_desc 
-{ 
-	width : 200px; 
-	display:inline-block;
-}
+.heading { font-weight: bold; }
+.databaselink{ width : 250px;}
+.rowimagecell { text-align:center; vertical-align : top; padding-top: 5px}
+.rowicon{ width : 32px; height : 32px;}
+.title:hover { cursor: hand; }
