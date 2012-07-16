@@ -5,7 +5,7 @@ var app = new broadway.App();
 
 app.use(require('./services/databaseservice'));
 app.use(require('./apps/cdcmanager/app'));
-
+app.use(require('./apps/broadcastmanager/app'));
 var options = {
   router: {
     'localhost/services': '127.0.0.1:8000',

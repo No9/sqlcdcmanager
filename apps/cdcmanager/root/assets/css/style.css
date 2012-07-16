@@ -5,3 +5,4 @@ ul { list-style: circle; }
 .rowimagecell { text-align:center; vertical-align : top; padding-top: 5px}
 .rowicon{ width : 32px; height : 32px;}
 .title:hover { cursor: hand; }
+.databaserowcdc { background : lightgrey;}

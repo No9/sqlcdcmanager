@@ -26,7 +26,7 @@
 				<td class="heading">Description</td>
 			</tr>
 		{{#each table}}
-			<tr onclick="toggleTable(this)">
+			<tr class="databaserow{{name}}" onclick="toggleTable(this)">
 				<td class="name">{{name}}</td>
 				<td class="tablename">{{tablename}}</td>
 				<td class="create_date">{{create_date}}</td>
