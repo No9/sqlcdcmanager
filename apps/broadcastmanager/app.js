@@ -1,5 +1,6 @@
 var request = require('request');
 var sql = require('node-sqlserver');
+var hookio = require('hook.io'); 
 
 var trackedtables = [];
 
@@ -56,6 +57,10 @@ function requesttables(databasename){
 				})
 }
 
+var hookB = hookio.createHook({
+  name: "sqlcdc"
+});
+
 function checktablesfordatachanges(){
 	for(var i=0;i < trackedtables.length;i++){
 		console.log("Tracked Database : " + trackedtables[i].database);
@@ -80,13 +85,16 @@ function checktablesfordatachanges(){
 					item.modify_date = results.rows[i][3];
 					item.is_tracked_by_cdc = results.rows[i][4];
 					item.type_desc = results.rows[i][5];
-					_res.write(JSON.stringify(item));
+					datagram += JSON.stringify(item);
+					console.log(item);
 					if(i != results.rows.length - 1)
 					{
-						_res.write(",");
+						 datagram += ",";
 					}
 				}
 				datagram += "]";
+				hookB.emit('data', datagram);
+				
 			});
 		});	
 	}
