@@ -12,7 +12,7 @@
   <table>
 	<tr><td class="heading">Name</td><td class="heading">Status</td></tr>
   {{#each database}}
-	<tr><td><a href="{{location}}&enabled={{cdcenabled}}">{{name}}</a></td><td class="rowimagecell"><img src="/config/assets/images/enabled{{cdcenabled}}.png" class="rowicon" /></td></tr>
+	<tr><td><a href="/config/database.html?name={{name}}&enabled={{cdcenabled}}">{{name}}</a></td><td class="rowimagecell"><img src="/config/assets/images/enabled{{cdcenabled}}.png" class="rowicon" /></td></tr>
   {{/each}}
   </table>
 </div>

@@ -5,6 +5,7 @@ var url = require('url');
 
 exports.init = function(done)
 {
+	console.log("Dataservices started on http://localhost:8000/");
 	
 	function databaselist(route)
 	{
@@ -31,7 +32,6 @@ exports.init = function(done)
 					item.name = results.rows[i][0];
 					item.id = results.rows[i][1];
 					item.cdcenabled = results.rows[i][2];
-					item.location = '/config/database.html?name=' + results.rows[i][0]; 
 					_res.write(JSON.stringify(item));
 					if(i != results.rows.length - 1)
 					{
@@ -45,7 +45,6 @@ exports.init = function(done)
 	
 	function database(route){
 	    var parts = url.parse(this.req.url);
-		console.log('GET DATABASE TABLES');
 		var pathbits = parts.path.split("/"); 
 		var dbname = pathbits.pop();
 		var conn_str = "Driver={SQL Server Native Client 11.0};Server=(local);Database=" + dbname + ";Trusted_Connection={Yes}";
