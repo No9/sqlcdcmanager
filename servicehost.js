@@ -2,7 +2,6 @@ var broadway = require('broadway');
 var httpProxy = require('http-proxy');
 var winston = require('winston');
 var app = new broadway.App();
-
 app.use(require('./services/databaseservice'));
 app.use(require('./apps/cdcmanager/app'));
 app.use(require('./apps/broadcastmanager/app'));

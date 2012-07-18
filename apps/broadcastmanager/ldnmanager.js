@@ -1,4 +1,5 @@
 var sql = require('node-sqlserver'); 
+var winston = require('winston');
 
 module.exports = {
   parseldn: parseldn,
@@ -40,7 +41,7 @@ function saveldn(dbname, tblname, ldn, cb){
 	sqlcdc_databasecdc += "WHEN NOT MATCHED THEN ";
 	sqlcdc_databasecdc += "INSERT (databasename, tablename, currentLSN) ";
 	sqlcdc_databasecdc += "VALUES (SRC.dbname, SRC.tblname, " + ldn + ");";
-				
+	winston.log('info', sqlcdc_databasecdc);
 	var sqlcdc_stmt = sql.query(sqlcdc_conn_str, sqlcdc_databasecdc);
 	sqlcdc_stmt.on('error', function (err) { console.log("merge had an error. Have your created the sqlcdc database? " + err); });
 	sqlcdc_stmt.on('done', function () { 
