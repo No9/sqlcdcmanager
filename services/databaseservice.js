@@ -2,6 +2,7 @@ var sql = require('node-sqlserver');
 var http = require('http');
 var director = require('director');
 var url = require('url');
+var hookio = require('hook.io'); 
 
 exports.init = function(done)
 {
@@ -98,12 +99,15 @@ exports.init = function(done)
 		console.log('database name: ' + dbname);
 		var conn_str = "Driver={SQL Server Native Client 11.0};Server=(local);Database=" + dbname + ";Trusted_Connection={Yes}";
 		var databasecdc = "";
-		
+		var hookB = hookio.createHook({ name: "sqlcdc" });
+				
 		if(reqtype == "databasestatusupdate"){		
 			if(status == "1"){
-				databasecdc = "EXEC sys.sp_cdc_enable_db"; 
+				databasecdc = "EXEC sys.sp_cdc_enable_db";
+				hookB.emit('databaseadded', dbname);				
 			}else{
 				databasecdc = "EXEC sys.sp_cdc_disable_db ";
+				hookB.emit('databaseremoved', dbname);
 			}
 		}else{
 				console.log('updating table : ' + reqobject.schema + " : " + reqobject.tablename);

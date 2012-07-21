@@ -21,5 +21,3 @@ app.init(function (err) {
 		winston.log('error', err);
 	}
 });
-
-
