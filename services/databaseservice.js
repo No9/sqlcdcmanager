@@ -3,10 +3,11 @@ var http = require('http');
 var director = require('director');
 var url = require('url');
 var hookio = require('hook.io'); 
+var winston = require('winston');
 
 exports.init = function(done)
 {
-	console.log("Dataservices started on http://localhost:8000/");
+	winston.log('info', 'Dataservices started on http://localhost:8000/');
 	
 	function databaselist(route)
 	{
@@ -88,15 +89,11 @@ exports.init = function(done)
 	
 	
 	
-	function updatedatabase(_res, data)
-	{
-		console.log('POST database update');
+	function updatedatabase(_res, data){
 		var reqobject = JSON.parse(data);
 	    var dbname = reqobject.databasename;
 		var status = reqobject.status;
 		var reqtype = reqobject.type;
-		
-		console.log('database name: ' + dbname);
 		var conn_str = "Driver={SQL Server Native Client 11.0};Server=(local);Database=" + dbname + ";Trusted_Connection={Yes}";
 		var databasecdc = "";
 		var hookB = hookio.createHook({ name: "sqlcdc" });
@@ -110,10 +107,9 @@ exports.init = function(done)
 				hookB.emit('databaseremoved', dbname);
 			}
 		}else{
-				console.log('updating table : ' + reqobject.schema + " : " + reqobject.tablename);
+				winston.log('info', 'updating table : ' + reqobject.schema + " : " + reqobject.tablename);
 		
 			if(status == "1"){
-					//{"type":"tablestatusupdate","databasename":"nodejstest","schema":"dbo","tablename":"TestTable1","role":"","status":"1"} 
 					databasecdc = "EXEC sys.sp_cdc_enable_table " ;
 					databasecdc += "@source_schema = N'" + reqobject.schema + "',"; 
 					databasecdc += "@source_name   = N'" + reqobject.tablename + "',"; 
@@ -155,11 +151,10 @@ exports.init = function(done)
 		if (req.method == 'POST') {
 			var chunks = [];
 			req.on('data', function(chunk){
-				console.log("DATA: " + chunk.toString());
 				chunks.push(chunk);
 			});
 			req.on('end', function(){
-				console.log(chunks.toString());
+				winston.log('silly', chunks.toString());
 				updatedatabase(res, chunks.toString()); 
 			});
 		}else{

@@ -11,12 +11,12 @@ var hookB = hookio.createHook({
 });
 
 hookB.on('databaseadded', function(data){
-		console.log(this.event + ' ' + data);
+		winston.log('info', this.event + ' ' + data);
 		intervallist[data.name] = setInterval(requesttables, 1000, data.name);
 	});
 
 	hookB.on('databaseremoved', function(data){
-		console.log('Removed ' + this.event + ' ' + data);
+		winston.log('info', 'Removed ' + this.event + ' ' + data);
 		clearInterval(intervallist[data.name]);
 	});
 	
@@ -136,8 +136,6 @@ function contains(a, obj) {
 function remove(a, obj){
 	var i =  a.length;
 	while(i--){
-	console.log(obj);
-	console.log(a[i]);
 		
 		if ((a[i].database == obj.database) &&  (a[i].tablename == obj.tablename)){
 		   winston.log('info', 'Removing ' + obj.database + ' ' + obj.tablename + ' from table list');
