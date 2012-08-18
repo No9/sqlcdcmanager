@@ -11,12 +11,12 @@ var hookB = hookio.createHook({
 });
 
 hookB.on('databaseadded', function(data){
-		winston.log('info', this.event + ' ' + data);
+		//winston.log('info', this.event + ' ' + data);
 		intervallist[data.name] = setInterval(requesttables, 1000, data.name);
 	});
 
 	hookB.on('databaseremoved', function(data){
-		winston.log('info', 'Removed ' + this.event + ' ' + data);
+		//winston.log('info', 'Removed ' + this.event + ' ' + data);
 		clearInterval(intervallist[data.name]);
 	});
 	
@@ -44,18 +44,21 @@ function checktablesfordatachanges(dbname, tblname, ldn){
 	
 		var conn_str = "Driver={SQL Server Native Client 11.0};Server=(local);Database=" + dbname + ";Trusted_Connection={Yes}";
 		var databasecdc = "SELECT * FROM cdc." + tblname + " where __$start_lsn > " + ldn;
-		winston.log('info', databasecdc);
+		//winston.log('info', databasecdc);
 		
 		(function(dbname, tblname, ldn){
 			var datagram = [];
 			var metadata = [];
 			var currentObject = {};
+			var rowcount = 0;
 			var stmt = sql.query(conn_str, databasecdc);
 			
 			stmt.on('meta', function (meta) { metadata = meta;});
 			
 			stmt.on('row', function (idx) { 
 					currentObject = {};
+					
+					rowcount++;
 			});
 			
 			stmt.on('column', function (idx, data, more) { 
@@ -63,15 +66,22 @@ function checktablesfordatachanges(dbname, tblname, ldn){
 					ldn = ldnmanager.parseldn(data);
 				}
 				currentObject[metadata[idx].name] = data;
-				if(!more){
+				if(idx == (Object.keys(metadata).length - 1)){
+					currentObject.tablename = tblname;
 					datagram.push(currentObject);
 				}
 			});
 				
-			stmt.on('done', function () { 
-				//ldnmanager.setldn(trackedtables, dbname, tblname, ldn);
+			stmt.on('done', function () {
+				
 				ldnmanager.saveldn(dbname, tblname, ldn, function(){
-					hookB.emit('data', datagram);
+				    
+					//if( datasocket != undefined ){
+						if( datagram.length > 0 ){
+							//datasocket.emit( 'cdcevent', datagram );	
+							io.sockets.emit( 'cdcevent', datagram );							
+						}
+					//}
 				});
 			});
 			
@@ -81,6 +91,33 @@ function checktablesfordatachanges(dbname, tblname, ldn){
 			});
 		})(dbname, tblname, ldn)
 }
+
+var app = require('http').createServer(handler)
+  , io = require('socket.io').listen(app)
+  , fs = require('fs')
+  , hookio = require('hook.io')
+
+app.listen(8090);
+
+function handler (req, res) {
+  fs.readFile(__dirname + '/index.html',
+  function (err, data) {
+    if (err) {
+      res.writeHead(500);
+      return res.end('Error loading index.html');
+    }
+
+    res.writeHead(200);
+    res.end(data);
+  });
+}
+
+io.sockets.on('connection', function (socket) {
+  /*
+  socket.on('cdcevent', function (data) {
+    	socket.broadcast.emit('cdcevent', data);
+  });*/
+});
 
 function requesttables(databasename){
 	request('http://localhost:8000/services/databases/' + databasename, function (error, response, body) {
@@ -93,12 +130,12 @@ function requesttables(databasename){
 				
 			if(tables[j].is_tracked_by_cdc == "1"){
 				// Create a tracked object
-				winston.log('info', 'Looking for config changes on ' + databasename + ':' + tables[j].tablename);
+				//winston.log('info', 'Looking for config changes on ' + databasename + ':' + tables[j].tablename);
 				//We have have to see if the tracked object is in our current list of tracked objects
 				//if it isn't then add it
 				var sqlcdc_conn_str = "Driver={SQL Server Native Client 11.0};Server=(local);Database=sqlcdc;Trusted_Connection={Yes}";
 				var cdcdata = "SELECT * FROM tablestatus where tablename = '" + trackedObject.name + "' AND databasename = '" + databasename + "';";
-				winston.log('debug', cdcdata);
+				//winston.log('debug', cdcdata);
 					
 				(function(trkObj){
 					var stmt = sql.query(sqlcdc_conn_str, cdcdata);
@@ -112,7 +149,7 @@ function requesttables(databasename){
 							trkObj.ldn = 0;
 						}
 						checktablesfordatachanges(trkObj.database, trkObj.name, trkObj.ldn)
-						winston.log('info', 'Tracked ' + trkObj.name + ' to the tracked tables list with ldn ' + trkObj.ldn);
+						//winston.log('info', 'Tracked ' + trkObj.name + ' to the tracked tables list with ldn ' + trkObj.ldn);
 					});
 					stmt.on('error', function (err) { winston.log('error',"requesttables had an error :-( " + err); });
 				})(trackedObject);
@@ -138,7 +175,7 @@ function remove(a, obj){
 	while(i--){
 		
 		if ((a[i].database == obj.database) &&  (a[i].tablename == obj.tablename)){
-		   winston.log('info', 'Removing ' + obj.database + ' ' + obj.tablename + ' from table list');
+		   //winston.log('info', 'Removing ' + obj.database + ' ' + obj.tablename + ' from table list');
            a.splice(i, 1);
 		   return true;
        }

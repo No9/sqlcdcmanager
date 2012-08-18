@@ -7,7 +7,7 @@ var winston = require('winston');
 
 exports.init = function(done)
 {
-	winston.log('info', 'Dataservices started on http://localhost:8000/');
+	//winston.log('info', 'Dataservices started on http://localhost:8000/');
 	
 	function databaselist(route)
 	{
@@ -101,13 +101,15 @@ exports.init = function(done)
 		if(reqtype == "databasestatusupdate"){		
 			if(status == "1"){
 				databasecdc = "EXEC sys.sp_cdc_enable_db";
+				//databasecdc = "ALTER DATABASE " + dbname + " SET ALLOW_SNAPSHOT_ISOLATION ON "
+				//databasecdc += "ALTER DATABASE " + dbname + " SET CHANGE_TRACKING = ON (CHANGE_RETENTION = 2 DAYS, AUTO_CLEANUP = ON)"
 				hookB.emit('databaseadded', dbname);				
 			}else{
 				databasecdc = "EXEC sys.sp_cdc_disable_db ";
 				hookB.emit('databaseremoved', dbname);
 			}
 		}else{
-				winston.log('info', 'updating table : ' + reqobject.schema + " : " + reqobject.tablename);
+				//winston.log('info', 'updating table : ' + reqobject.schema + " : " + reqobject.tablename);
 		
 			if(status == "1"){
 					databasecdc = "EXEC sys.sp_cdc_enable_table " ;
@@ -154,7 +156,7 @@ exports.init = function(done)
 				chunks.push(chunk);
 			});
 			req.on('end', function(){
-				winston.log('silly', chunks.toString());
+				//winston.log('silly', chunks.toString());
 				updatedatabase(res, chunks.toString()); 
 			});
 		}else{

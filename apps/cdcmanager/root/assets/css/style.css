@@ -1,5 +1,16 @@
-body { font-family: Arial, Helvetica, sans-serif; padding : 15px;}
+body { 
+	font-family: 'Nunito', sans-serif; 
+	padding : 15px;
+	color : white;
+	background : black;
+	}
 ul { list-style: circle; }
+
+a:link {text-decoration: none; color : #626263}
+a:visited {text-decoration: none; color : #626263}
+a:active {text-decoration: none; color : #626263}
+a:hover {text-decoration: underline; color: white;}
+
 .heading { font-weight: bold; }
 .databaselink{ width : 250px;}
 .rowimagecell { text-align:center; vertical-align : top; padding-top: 5px}
