@@ -3,7 +3,7 @@ var sql = require('node-sqlserver');
 var hookio = require('hook.io'); 
 var winston = require('winston');
 var ldnmanager = require('./ldnmanager.js');
-
+var io = require('./socketservice.js').start(8090);
 var intervallist = {};
 
 var hookB = hookio.createHook({
@@ -73,15 +73,10 @@ function checktablesfordatachanges(dbname, tblname, ldn){
 			});
 				
 			stmt.on('done', function () {
-				
 				ldnmanager.saveldn(dbname, tblname, ldn, function(){
-				    
-					//if( datasocket != undefined ){
-						if( datagram.length > 0 ){
-							//datasocket.emit( 'cdcevent', datagram );	
+						if( datagram.length > 0 ){	
 							io.sockets.emit( 'cdcevent', datagram );							
 						}
-					//}
 				});
 			});
 			
@@ -91,33 +86,6 @@ function checktablesfordatachanges(dbname, tblname, ldn){
 			});
 		})(dbname, tblname, ldn)
 }
-
-var app = require('http').createServer(handler)
-  , io = require('socket.io').listen(app)
-  , fs = require('fs')
-  , hookio = require('hook.io')
-
-app.listen(8090);
-
-function handler (req, res) {
-  fs.readFile(__dirname + '/index.html',
-  function (err, data) {
-    if (err) {
-      res.writeHead(500);
-      return res.end('Error loading index.html');
-    }
-
-    res.writeHead(200);
-    res.end(data);
-  });
-}
-
-io.sockets.on('connection', function (socket) {
-  /*
-  socket.on('cdcevent', function (data) {
-    	socket.broadcast.emit('cdcevent', data);
-  });*/
-});
 
 function requesttables(databasename){
 	request('http://localhost:8000/services/databases/' + databasename, function (error, response, body) {
@@ -157,8 +125,6 @@ function requesttables(databasename){
 	  }
 	})
 }
-
-
 
 function contains(a, obj) {
     var i = a.length;

@@ -9,38 +9,89 @@
     <script src="http://localhost:8090/socket.io/socket.io.js"  type="text/javascript"></script>
     <script  type="text/javascript">
         var socket = io.connect('http://localhost:8090');
-        
+        var logging = true;
 
         socket.on('cdcevent', function (data) {
             log('<BR/>EVENT');
             for (var item in data) {
                 var cdcitem = data[item];
                 log(cdcitem["__$operation"])
-                switch (cdcitem["__$operation"]) {
-                    case 4:
-                        var trs = $('tr');
+                var trs = $('tr');
+
+                switch (cdcitem["__$operation"]) {    
+                    case 1:
+                        
                         trs.each(function (i, n) {
-                            var current = $(n);
+                            if (n.children[0].innerHTML == cdcitem.ID) {
+                                $(n).remove();
+                                return false;
+                            }
+                        });
+                        break;
+                    case 2:
+                        //Insert
+                        var hasloaded = false;
+                        trs.each(function (i, n) {
+                            log ("<br/>First Child = " + n.children[0].innerHTML);
+                            if (n.children[0].innerHTML == cdcitem.ID) {
+                                hasloaded = true;
+                                return false;
+                            }
+                        });
+
+                        if (!hasloaded) {
+                            var last = trs.last();
+                            var d = new Date(cdcitem.ReleaseDate);
+                            var curr_date = d.getDate();
+                            var curr_month = d.getMonth() + 1; //Months are zero based
+                            var curr_year = d.getFullYear();
+
+                            var after = '<tr><td>' + cdcitem.ID + '</td>'
+                            after += '<td>' + cdcitem.Title + '</td>'
+                            after += '<td>' + curr_date + "/" + curr_month + "/" + curr_year + '</td>'
+                            after += '<td>' + cdcitem.Genre + '</td>'
+                            after += '<td>€' + cdcitem.Price.toFixed(2) + '</td>'
+                            after += '<td>' + cdcitem.Rating + '</td><td>'
+                            after += '<a href="/Movies/Edit/' + cdcitem.ID + '">Edit</a> | '
+                            after += '<a href="/Movies/Details/' + cdcitem.ID + '">Details</a> | '
+                            after += '<a href="/Movies/Delete/' + cdcitem.ID + '">Delete</a></td></tr>'
+                            $(after).insertAfter(last);
+                        }
+
+                        break;
+                    case 4: //Update
+                        
+                        trs.each(function (i, n) {
+                            //var current = $(n);
                             log("<br/>First Child = " + n.children[0].innerHTML);
                             if (n.children[0].innerHTML == cdcitem.ID) {
                                 //We are at the right row
                                 log('<br/>Changing to ' + cdcitem.Title);
                                 n.children[1].innerHTML = cdcitem.Title;
+                                var d = new Date(cdcitem.ReleaseDate);
+                                var curr_date = d.getDate();
+                                var curr_month = d.getMonth() + 1; //Months are zero based
+                                var curr_year = d.getFullYear();
+                                n.children[2].innerHTML = curr_date + "/" + curr_month + "/" + curr_year;
+                                n.children[3].innerHTML = cdcitem.Genre;
+                                n.children[4].innerHTML = "€" + cdcitem.Price.toFixed(2);
+                                n.children[5].innerHTML = cdcitem.Rating;
+                                return false;
                             }
                         });
                         break;
                 }
 
-                //var elementtext = document.getElementById("debug").innerHTML;
-                //document.getElementById("debug").innerHTML = elementtext + "<div>" + JSON.stringify(data[item]) + "</div>";
             }
 
         });
 
         function log(text) {
-            var out = document.getElementById("debug").innerHTML;
+            if (logging) {
+                var out = document.getElementById("debug").innerHTML;
                 out += text;
                 document.getElementById("debug").innerHTML = out;
+            }
         }
 </script>
 </head>
