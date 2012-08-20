@@ -30,10 +30,13 @@ On the server open [http://localhost:9000/config](http://localhost:9000/config)
 Click the Databases link at the top of the page.
 Select the database you want to enable change data capture on
 ![Enable Change Data Capture](http://farm8.staticflickr.com/7133/7827235140_19561b8dae.jpg "CDC Database List")
+
 On the database configuration page toggle the database
 ![Toggle The Database](http://farm9.staticflickr.com/8442/7827273968_b128ccafd6.jpg "Toggle The Database")
+
 Your node console should so that the database has been added
 ![Toggle The Database](http://farm9.staticflickr.com/8439/7827293440_9c955bdf33.jpg "Database Added")
+
 Now enable a table for change data capture by clicking on the red X next to the table you wish to enable.
 (N.B. the tables that are greyed out are internal system tables used by SQL Server Change Data Capture.
 ![Select Table](http://farm9.staticflickr.com/8287/7827310526_ef77436322.jpg "Selected Tables")
