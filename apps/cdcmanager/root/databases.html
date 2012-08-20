@@ -36,6 +36,10 @@ class="enabled{{cdcenabled}}"
 				var html    = template(databases);			 
 				document.getElementById('databaselist').innerHTML =  html;
 			}
+			if(httpmenu.readyState == 4 && httpmenu.status =! 200){
+				alert('Create Database Failed' + httpmenu.responseText);
+			}
+			
 		}
 		httpmenu.send();
 </script>
