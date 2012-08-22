@@ -46,6 +46,8 @@ exports.init = function(done)
 	}
 	
 	function database(route){
+	    console.log("ROUTE");
+		console.log(route);
 	    var parts = url.parse(this.req.url);
 		var pathbits = parts.path.split("/"); 
 		var dbname = pathbits.pop();
@@ -57,7 +59,7 @@ exports.init = function(done)
 		sql.open(conn_str, function (err, conn) {
 			if (err) {
 				_res.writeHead(500, { 'Content-Type': 'application/json' })
-				_res.end("Error opening the connection!");
+				_res.end("Database route: Error opening the connection! " + conn_str);
 				return;
 			}
 			conn.queryRaw(databasecdc, function (err, results) {
@@ -95,19 +97,28 @@ exports.init = function(done)
 		var status = reqobject.status;
 		var reqtype = reqobject.type;
 		var conn_str = "Driver={SQL Server Native Client 11.0};Server=(local);Database=" + dbname + ";Trusted_Connection={Yes}";
+		
 		var databasecdc = "";
-		var hookB = hookio.createHook({ name: "sqlcdc" });
-				
-		if(reqtype == "databasestatusupdate"){		
-			if(status == "1"){
-				databasecdc = "EXEC sys.sp_cdc_enable_db";
-				//databasecdc = "ALTER DATABASE " + dbname + " SET ALLOW_SNAPSHOT_ISOLATION ON "
-				//databasecdc += "ALTER DATABASE " + dbname + " SET CHANGE_TRACKING = ON (CHANGE_RETENTION = 2 DAYS, AUTO_CLEANUP = ON)"
-				hookB.emit('databaseadded', dbname);				
-			}else{
-				databasecdc = "EXEC sys.sp_cdc_disable_db ";
-				hookB.emit('databaseremoved', dbname);
-			}
+		var hookB = hookio.createHook({ name: "databaseservice" });
+			hookB.start();
+			hookB.on('hook::ready', function(){
+		if(reqtype == "databasestatusupdate"){
+			
+			//			
+				if(status == "1"){
+					databasecdc = "EXEC sys.sp_cdc_enable_db";
+					//databasecdc = "ALTER DATABASE " + dbname + " SET ALLOW_SNAPSHOT_ISOLATION ON "
+					//databasecdc += "ALTER DATABASE " + dbname + " SET CHANGE_TRACKING = ON (CHANGE_RETENTION = 2 DAYS, AUTO_CLEANUP = ON)"
+					hookB.emit('databaseadded', dbname);
+					//hookB.stop();					
+				}else{
+					databasecdc = "EXEC sys.sp_cdc_disable_db ";
+					hookB.emit('databaseremoved', dbname);
+					//hookB.stop();
+				}
+			//
+			
+			
 		}else{
 				//winston.log('info', 'updating table : ' + reqobject.schema + " : " + reqobject.tablename);
 		
@@ -123,11 +134,11 @@ exports.init = function(done)
 					databasecdc += "@capture_instance = N'" + reqobject.schema + "_" + reqobject.tablename + "'";
 			}
 		}
-		
+		console.log("CONNECTION:" + conn_str);
 		sql.open(conn_str, function (err, conn) {
 			if (err) {
 				_res.writeHead(500, { 'Content-Type': 'application/json' })
-				_res.end("Error opening the connection!");
+				_res.end("Update Database: Error opening the connection!");
 				return;
 			}
 			conn.queryRaw(databasecdc, function (err, results) {
@@ -140,7 +151,8 @@ exports.init = function(done)
 				_res.end(status);
 			});
 		});
-	}
+	});
+}
 	
 	var router = new director.http.Router({
 		'/services/databases' : { get : databaselist },
