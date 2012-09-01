@@ -4,14 +4,14 @@ var director = require('director');
 var url = require('url');
 var hookio = require('hook.io'); 
 var winston = require('winston');
+var config = require('../config.json');
 
 exports.init = function(done)
 {
-	//winston.log('info', 'Dataservices started on http://localhost:8000/');
-	
+	winston.log('info', 'Dataservices started on http://localhost:8000/');
 	function databaselist(route)
 	{
-		var conn_str = "Driver={SQL Server Native Client 11.0};Server=(local);Database=master;Trusted_Connection={Yes}";
+		var conn_str = config.dbconnection;
 		var databasecdc = "SELECT [name], database_id, is_cdc_enabled  FROM sys.databases"; 
 		var _res = this.res;
 		
@@ -51,7 +51,8 @@ exports.init = function(done)
 	    var parts = url.parse(this.req.url);
 		var pathbits = parts.path.split("/"); 
 		var dbname = pathbits.pop();
-		var conn_str = "Driver={SQL Server Native Client 11.0};Server=(local);Database=" + dbname + ";Trusted_Connection={Yes}";
+		var conn_str = config.dbconnection.replace("Database=master", "Database=" + dbname); 
+		
 		var databasecdc = "SELECT sys.schemas.name, sys.tables.name AS tablename, sys.tables.create_date, sys.tables.modify_date, sys.tables.is_tracked_by_cdc, sys.tables.type_desc "
 						  + "FROM sys.schemas INNER JOIN "
                           + "sys.tables ON sys.schemas.schema_id = sys.tables.schema_id"; 
@@ -96,45 +97,36 @@ exports.init = function(done)
 	    var dbname = reqobject.databasename;
 		var status = reqobject.status;
 		var reqtype = reqobject.type;
-		var conn_str = "Driver={SQL Server Native Client 11.0};Server=(local);Database=" + dbname + ";Trusted_Connection={Yes}";
+		var conn_str = config.dbconnection.replace("Database=master", "Database=" + dbname); 
 		
 		var databasecdc = "";
 		var hookB = hookio.createHook({ name: "databaseservice" });
 			hookB.start();
 			hookB.on('hook::ready', function(){
 		if(reqtype == "databasestatusupdate"){
-			
-			//			
 				if(status == "1"){
 					databasecdc = "EXEC sys.sp_cdc_enable_db";
-					//databasecdc = "ALTER DATABASE " + dbname + " SET ALLOW_SNAPSHOT_ISOLATION ON "
-					//databasecdc += "ALTER DATABASE " + dbname + " SET CHANGE_TRACKING = ON (CHANGE_RETENTION = 2 DAYS, AUTO_CLEANUP = ON)"
 					hookB.emit('databaseadded', dbname);
-					//hookB.stop();					
+										
 				}else{
 					databasecdc = "EXEC sys.sp_cdc_disable_db ";
 					hookB.emit('databaseremoved', dbname);
-					//hookB.stop();
 				}
-			//
-			
-			
 		}else{
-				//winston.log('info', 'updating table : ' + reqobject.schema + " : " + reqobject.tablename);
-		
+			winston.log('info', 'updating table : ' + reqobject.schema + " : " + reqobject.tablename);
 			if(status == "1"){
-					databasecdc = "EXEC sys.sp_cdc_enable_table " ;
-					databasecdc += "@source_schema = N'" + reqobject.schema + "',"; 
-					databasecdc += "@source_name   = N'" + reqobject.tablename + "',"; 
-					databasecdc += "@role_name     = NULL";
+				databasecdc = "EXEC sys.sp_cdc_enable_table " ;
+				databasecdc += "@source_schema = N'" + reqobject.schema + "',"; 
+				databasecdc += "@source_name   = N'" + reqobject.tablename + "',"; 
+				databasecdc += "@role_name     = NULL";
 			}else{
-					databasecdc = "EXECUTE sys.sp_cdc_disable_table ";
-					databasecdc += "@source_schema = N'" + reqobject.schema + "',";
-					databasecdc += "@source_name = N'" + reqobject.tablename + "',"; 
-					databasecdc += "@capture_instance = N'" + reqobject.schema + "_" + reqobject.tablename + "'";
+				databasecdc = "EXECUTE sys.sp_cdc_disable_table ";
+				databasecdc += "@source_schema = N'" + reqobject.schema + "',";
+				databasecdc += "@source_name = N'" + reqobject.tablename + "',"; 
+				databasecdc += "@capture_instance = N'" + reqobject.schema + "_" + reqobject.tablename + "'";
 			}
 		}
-		console.log("CONNECTION:" + conn_str);
+		
 		sql.open(conn_str, function (err, conn) {
 			if (err) {
 				_res.writeHead(500, { 'Content-Type': 'application/json' })

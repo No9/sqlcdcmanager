@@ -1,2 +1,3 @@
 {
+	"dbconnection" : "Driver={SQL Server Native Client 11.0};Server=(local);Database=master;Trusted_Connection={Yes}"
 }

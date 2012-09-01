@@ -8,19 +8,43 @@ The goal is to emit these changes through a socket.io server to enable data driv
 As this is SQL Server specific it will only run on windows with node.
 
 ## Installation 
+sqlcdc is capable of running on a seperate host than the actual database server this section will outline the steps that have to be performed on the database and the application server as seperate steps to illustrate this point. 
+However sqlcdc can also be ran on the same machine as the database server. 
+
+### Database Server
+On the machine where SQL Server 2008 or Above is installed perform the following:
 ```
 > git clone git@github.com:No9/sqlcdc.git
 > cd sqlcdc
 > npm install
 > osql -E -i .\sqlscripts\Generate_cdcsql_database.sql
 ```
+
+You can also just copy the ```Generate_cdcsql_database.sql``` to the server rather than installing git.
+
 Open a new command prompt as Administrator 
 ```
 > net start "SQL Server Agent (MSSQLSERVER)"
 ```
+
 Or open SQL Server management studio and make sure the SQL Server Agent Is Running.
 
-## Start The Service
+### Application Server
+
+On the application server in the location you wish to install sqlcdc run:
+```
+> git clone git@github.com:No9/sqlcdc.git
+> cd sqlcdc
+> npm install
+```
+
+You may want to change config.json in the root directory of your database server.
+The config file points to the local instance so if you are running sqlcdc on the same machine as the database nothing needs to be done.
+```
+"dbconnection" : "Driver={SQL Server Native Client 11.0};Server=NAME_OR_IP_OF_SQLSERVER;Database=master;Trusted_Connection={Yes}"
+```
+
+Start The Service
 ```
 > node index.js 
 ``` 

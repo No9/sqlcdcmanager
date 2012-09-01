@@ -9,7 +9,6 @@ var log = require("npmlog")
   , fs = require("graceful-fs")
   , chain = require("slide").chain
   , constants = require("constants")
-  , output = require("./output.js")
   , Stream = require("stream").Stream
   , PATH = "PATH"
 
@@ -79,6 +78,10 @@ function lifecycle_ (pkg, stage, wd, env, unsafe, failOk, cb) {
   // the bundled one will be used for installing things.
   pathArr.unshift(path.join(__dirname, "..", "..", "bin", "node-gyp-bin"))
 
+  // add the directory containing the `node` executable currently running, so
+  // that any lifecycle script that invoke "node" will execute this same one.
+  pathArr.unshift(path.dirname(process.execPath))
+
   if (env[PATH]) pathArr.push(env[PATH])
   env[PATH] = pathArr.join(process.platform === "win32" ? ";" : ":")
 
@@ -87,14 +90,6 @@ function lifecycle_ (pkg, stage, wd, env, unsafe, failOk, cb) {
   if (packageLifecycle) {
     // define this here so it's available to all scripts.
     env.npm_lifecycle_script = pkg.scripts[stage]
-    // if the command is "node-gyp <args>", then call ours instead.
-    try {
-      var ourGyp = require.resolve("node-gyp/bin/node-gyp.js")
-    } catch (er) {
-      return cb(new Error("No gyp installed with npm"))
-    }
-    var gyp = path.execPath + " " + JSON.stringify(ourGyp)
-    pkg.scripts[stage] = pkg.scripts[stage].replace(/^node-gyp( |$)/, gyp)
   }
 
   if (failOk) {
@@ -149,32 +144,29 @@ function runPackageLifecycle (pkg, env, wd, unsafe, cb) {
   var note = "\n> " + pkg._id + " " + stage + " " + wd
            + "\n> " + cmd + "\n"
 
-  output.write(note, function (er) {
-    if (er) return cb(er)
-
-    exec( sh, [shFlag, cmd], env, true, wd
-        , user, group
-        , function (er, code, stdout, stderr) {
-      if (er && !npm.ROLLBACK) {
-        log.info(pkg._id, "Failed to exec "+stage+" script")
-        er.message = pkg._id + " "
-                   + stage + ": `" + env.npm_lifecycle_script+"`\n"
-                   + er.message
-        if (er.code !== "EPERM") {
-          er.code = "ELIFECYCLE"
-        }
-        er.pkgid = pkg._id
-        er.stage = stage
-        er.script = env.npm_lifecycle_script
-        er.pkgname = pkg.name
-        return cb(er)
-      } else if (er) {
-        log.error(pkg._id+"."+stage, er)
-        log.error(pkg._id+"."+stage, "continuing anyway")
-        return cb()
+  console.log(note)
+  exec( sh, [shFlag, cmd], env, true, wd
+      , user, group
+      , function (er, code, stdout, stderr) {
+    if (er && !npm.ROLLBACK) {
+      log.info(pkg._id, "Failed to exec "+stage+" script")
+      er.message = pkg._id + " "
+                 + stage + ": `" + env.npm_lifecycle_script+"`\n"
+                 + er.message
+      if (er.code !== "EPERM") {
+        er.code = "ELIFECYCLE"
       }
-      cb(er)
-    })
+      er.pkgid = pkg._id
+      er.stage = stage
+      er.script = env.npm_lifecycle_script
+      er.pkgname = pkg.name
+      return cb(er)
+    } else if (er) {
+      log.error(pkg._id+"."+stage, er)
+      log.error(pkg._id+"."+stage, "continuing anyway")
+      return cb()
+    }
+    cb(er)
   })
 }
 
@@ -250,8 +242,7 @@ function makeEnv (data, prefix, env) {
 
   prefix = "npm_config_"
   var pkgConfig = {}
-    , ini = require("./ini.js")
-    , keys = ini.keys
+    , keys = npm.config.keys
     , pkgVerConfig = {}
     , namePref = data.name + ":"
     , verPref = data.name + "@" + data.version + ":"
@@ -260,7 +251,7 @@ function makeEnv (data, prefix, env) {
     if (i.charAt(0) === "_" && i.indexOf("_"+namePref) !== 0) {
       return
     }
-    var value = ini.get(i)
+    var value = npm.config.get(i)
     if (value instanceof Stream) return
     if (!value) value = ""
     else if (typeof value !== "string") value = JSON.stringify(value)

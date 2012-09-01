@@ -5,8 +5,9 @@ completion.usage = "npm completion >> ~/.bashrc\n"
                  + "npm completion >> ~/.zshrc\n"
                  + "source <(npm completion)"
 
-var output = require("./utils/output.js")
-  , configDefs = require("./utils/config-defs.js")
+var npm = require("./npm.js")
+  , npmconf = require("npmconf")
+  , configDefs = npmconf.defs
   , configTypes = configDefs.types
   , shorthands = configDefs.shorthands
   , nopt = require("nopt")
@@ -200,7 +201,9 @@ function wrapCb (cb, opts) { return function (er, compls) {
   })
   console.error([er && er.stack, compls, opts.partialWord])
   if (er || compls.length === 0) return cb(er)
-  output.write(compls.join("\n"), 1, false, cb)
+
+  console.log(compls.join("\n"))
+  cb()
 }}
 
 // the current word has a dash.  Return the config names,

@@ -1,6 +1,6 @@
 var sql = require('node-sqlserver'); 
 var winston = require('winston');
-
+var config = require('../config.json');
 module.exports = {
   parseldn: parseldn,
   setldn: setldn,
@@ -32,7 +32,7 @@ function setldn(trackedtables, dbname, tblname, ldn)
 }
 
 function saveldn(dbname, tblname, ldn, cb){
-    var sqlcdc_conn_str = "Driver={SQL Server Native Client 11.0};Server=(local);Database=sqlcdc;Trusted_Connection={Yes}";
+	var sqlcdc_conn_str = config.dbconnection.replace("Database=master", "Database=sqlcdc");
     var sqlcdc_databasecdc = "MERGE INTO [sqlcdc].[dbo].[tablestatus]";
 	sqlcdc_databasecdc += "USING (SELECT '" + dbname + "' AS dbname, '" + tblname + "' as tblname ) AS SRC ";
 	sqlcdc_databasecdc += "ON tablestatus.databasename = SRC.dbname AND tablestatus.tablename = SRC.tblname ";

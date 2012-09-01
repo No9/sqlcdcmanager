@@ -4,6 +4,8 @@ var hookio = require('hook.io');
 var winston = require('winston');
 var ldnmanager = require('./ldnmanager.js');
 var io = require('./socketservice.js').start(8090);
+var config = require('../config.json');
+
 var intervallist = {};
 
 var hookB = hookio.createHook({
@@ -16,7 +18,7 @@ hookB.on('*::databaseadded', function(data){
 	});
 
 	hookB.on('*::databaseremoved', function(data){
-		//winston.log('info', 'Removed ' + this.event + ' ' + data);
+		winston.log('info', 'Removed ' + this.event + ' ' + data);
 		clearInterval(intervallist[data]);
 	});
 	
@@ -43,7 +45,7 @@ function checkdatabasesforschemachange(){
 
 function checktablesfordatachanges(dbname, tblname, ldn){
 	
-		var conn_str = "Driver={SQL Server Native Client 11.0};Server=(local);Database=" + dbname + ";Trusted_Connection={Yes}";
+		var conn_str = config.dbconnection.replace("Database=master", "Database=" + dbname);
 		var databasecdc = "SELECT * FROM cdc." + tblname + " where __$start_lsn > " + ldn;
 		winston.log('info', databasecdc);
 		
@@ -58,7 +60,6 @@ function checktablesfordatachanges(dbname, tblname, ldn){
 			
 			stmt.on('row', function (idx) { 
 					currentObject = {};
-					
 					rowcount++;
 			});
 			
@@ -104,7 +105,8 @@ function requesttables(databasename){
 				winston.log('info', 'Looking for config changes on ' + databasename + ':' + tables[j].tablename);
 				//We have have to see if the tracked object is in our current list of tracked objects
 				//if it isn't then add it
-				var sqlcdc_conn_str = "Driver={SQL Server Native Client 11.0};Server=(local);Database=sqlcdc;Trusted_Connection={Yes}";
+				
+				var sqlcdc_conn_str = config.dbconnection.replace("Database=master", "Database=sqlcdc");
 				var cdcdata = "SELECT * FROM tablestatus where tablename = '" + trackedObject.name + "' AND databasename = '" + databasename + "';";
 				//winston.log('debug', cdcdata);
 					

@@ -1,4 +1,3 @@
-
 // npm build command
 
 // everything about the installation after the creation of
@@ -20,7 +19,6 @@ var npm = require("./npm.js")
   , cmdShim = require("./utils/cmd-shim.js")
   , cmdShimIfExists = cmdShim.ifExists
   , asyncMap = require("slide").asyncMap
-  , output = require("./utils/output.js")
 
 module.exports = build
 build.usage = "npm build <folder>\n(this is plumbing)"
@@ -63,8 +61,11 @@ function build_ (global, didPre, didRB) { return function (folder, cb) {
 function writeBuiltinConf (folder, cb) {
   // the builtin config is "sticky". Any time npm installs itself,
   // it puts its builtin config file there, as well.
-  var ini = require("./utils/ini.js")
-  ini.saveConfig("builtin", path.resolve(folder, "npmrc"), cb)
+  if (!npm.config.usingBuiltin
+      || folder !== path.dirname(__dirname)) {
+    return cb()
+  }
+  npm.config.save("builtin", cb)
 }
 
 function linkStuff (pkg, folder, global, didRB, cb) {
@@ -150,7 +151,8 @@ function linkBins (pkg, folder, parent, gtop, cb) {
           , out = npm.config.get("parseable")
                 ? dest + "::" + src + ":BINFILE"
                 : dest + " -> " + src
-        output.write(out, cb)
+        console.log(out)
+        cb()
       })
     })
   }, cb)
