@@ -1,4 +1,5 @@
 var httpServer = require('http-server');
+var winston = require('winston');
 
 exports.init = function(done)
 {
@@ -6,7 +7,7 @@ exports.init = function(done)
 	config.port = 8001;
 	var port = config.port,
 			host = config.domain || '0.0.0.0',
-			log = console.log;
+			log = winston.log;
 		
 		
 		var options = {
@@ -15,11 +16,11 @@ exports.init = function(done)
 		  cache: true
 		}
 		function onListening() {
-		  log('Starting up http-server, serving '.yellow
+		  log('info', 'http-server Started serving '.yellow
 			+ server.root.cyan
 			+ ' on port: '.yellow
 			+ port.toString().cyan);
-		  log('Hit CTRL-C to stop the server');
+		  log('info', 'Hit CTRL-C to stop the server'.red);
 		}
 
 		var server = httpServer.createServer(options);
