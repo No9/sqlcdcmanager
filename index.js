@@ -14,8 +14,8 @@ var options = {
 
 var proxyServer = httpProxy.createServer(options);
 proxyServer.listen(9000);
-winston.log('info', 'Main Site Starting On http://localhost:9000/config/');
-winston.log('info', 'Base directory ' + __dirname);
+winston.log('info', 'Main Site Starting on'.yellow + ' http://localhost:9000/config/'.cyan);
+winston.log('info', 'Base directory '.yellow + __dirname.cyan);
 app.init(function (err) {
 	if(err){
 		winston.log('error', err);

@@ -8,7 +8,7 @@ var config = require('../config.json');
 
 exports.init = function(done)
 {
-	winston.log('info', 'Dataservices started on http://localhost:8000/');
+	winston.log('info', 'Dataservices started on '.yellow + 'http://localhost:8000/'.cyan);
 	function databaselist(route)
 	{
 		var conn_str = config.dbconnection;
@@ -114,16 +114,22 @@ exports.init = function(done)
 				}
 		}else{
 			winston.log('info', 'updating table : ' + reqobject.schema + " : " + reqobject.tablename);
+			var hookmsg = {};
+			hookmsg.dbname = dbname;
+			hookmsg.schema = reqobject.schema;
+			hookmsg.tablename = reqobject.tablename;
 			if(status == "1"){
 				databasecdc = "EXEC sys.sp_cdc_enable_table " ;
 				databasecdc += "@source_schema = N'" + reqobject.schema + "',"; 
 				databasecdc += "@source_name   = N'" + reqobject.tablename + "',"; 
 				databasecdc += "@role_name     = NULL";
+				hookB.emit('tableadded', hookmsg);
 			}else{
 				databasecdc = "EXECUTE sys.sp_cdc_disable_table ";
 				databasecdc += "@source_schema = N'" + reqobject.schema + "',";
 				databasecdc += "@source_name = N'" + reqobject.tablename + "',"; 
 				databasecdc += "@capture_instance = N'" + reqobject.schema + "_" + reqobject.tablename + "'";
+				hookB.emit('tableremoved', hookmsg);
 			}
 		}
 		
