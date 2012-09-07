@@ -46,6 +46,9 @@ The config file points to the local instance so if you are running sqlcdc on the
 
 ![Install the redis for windows](https://github.com/MSOpenTech/Redis "Redis Windows")
 
+**Start Redis as per your requirements**
+If you are just running the sample then double click on the redis-server.exe 
+
 Start The Service
 ```
 > node index.js 
