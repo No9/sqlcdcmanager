@@ -3,7 +3,8 @@ var sql = require('node-sqlserver');
 var hookio = require('hook.io'); 
 var winston = require('winston');
 var ldnmanager = require('./ldnmanager.js');
-var io = require('./socketservice.js').start(8090);
+var announce = require('socket.io-announce').createClient();
+
 var config = require('../config.json');
 
 var intervallist = {};
@@ -14,6 +15,7 @@ var hookB = hookio.createHook({
 
 hookB.on('*::databaseadded', function(data){
 		winston.log('info', this.event + ' ' + data);
+		console.log(data);
 		intervallist[data.name] = setInterval(requesttables, 1000, data);
 	});
 
@@ -36,7 +38,7 @@ function checkdatabasesforschemachange(){
 		var databases = JSON.parse(body);
 		for(var i=0; i < databases.length; i++){
 			if(databases[i].cdcenabled == "1"){
-				hookB.emit('databaseadded', databases[i]);
+				hookB.emit('*::databaseadded', databases[i]);
 			}
 		}
 	  }
@@ -75,9 +77,13 @@ function checktablesfordatachanges(dbname, tblname, ldn){
 			});
 				
 			stmt.on('done', function () {
+				console.log("fired done event");
 				ldnmanager.saveldn(dbname, tblname, ldn, function(){
+						console.log("saved ldn");
 						if( datagram.length > 0 ){	
-							io.sockets.emit( 'cdcevent', datagram );							
+							console.log("announced");
+							announce.emit( 'cdcevent', datagram );
+							//io.sockets.emit( 'cdcevent', datagram );							
 						}
 				});
 			});
@@ -89,8 +95,9 @@ function checktablesfordatachanges(dbname, tblname, ldn){
 		})(dbname, tblname, ldn)
 }
 
-function requesttables(databasename){
-	console.log("request tables:" + databasename);
+function requesttables(database){
+	
+	var databasename = database.name;
 	request('http://localhost:8000/services/databases/' + databasename, function (error, response, body) {
 	
 	var tables = JSON.parse(body);

@@ -44,10 +44,20 @@ The config file points to the local instance so if you are running sqlcdc on the
 "dbconnection" : "Driver={SQL Server Native Client 11.0};Server=NAME_OR_IP_OF_SQLSERVER;Database=master;Trusted_Connection={Yes}"
 ```
 
+![Install the redis for windows](https://github.com/MSOpenTech/Redis "Redis Windows")
+
 Start The Service
 ```
 > node index.js 
 ``` 
+
+Start the clustered socket.io instances
+```
+> cd services
+> node socketservicecluster.js
+```
+
+
 
 ## Configuration Of Sample
 
@@ -82,3 +92,15 @@ Add a new movie in one screen and the same movie should update in the other scre
 
 Please look at _Layout.cshtml for the additional javascript code that makes this possible.
 **N.B. This does not require any additional node.js code in the main MVC solution**
+
+##License
+
+(The MIT License)
+
+Copyright (c) 2012 Anthony Whalley
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

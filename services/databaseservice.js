@@ -46,8 +46,6 @@ exports.init = function(done)
 	}
 	
 	function database(route){
-	    console.log("ROUTE");
-		console.log(route);
 	    var parts = url.parse(this.req.url);
 		var pathbits = parts.path.split("/"); 
 		var dbname = pathbits.pop();
