@@ -47,7 +47,6 @@ function startserver(port){
 		  socket.emit('nodeId', process.pid);
 
 		  socket.on('cdcevent', function (data, fn) {
-			console.log("data");
 			socket.broadcast.emit('cdcevent', data);
 		  });
 

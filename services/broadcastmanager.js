@@ -77,13 +77,11 @@ function checktablesfordatachanges(dbname, tblname, ldn){
 			});
 				
 			stmt.on('done', function () {
-				console.log("fired done event");
 				ldnmanager.saveldn(dbname, tblname, ldn, function(){
 						console.log("saved ldn");
 						if( datagram.length > 0 ){	
-							console.log("announced");
-							announce.emit( 'cdcevent', datagram );
-							//io.sockets.emit( 'cdcevent', datagram );							
+							//Send change to redis
+							announce.emit( 'cdcevent', datagram );							
 						}
 				});
 			});
