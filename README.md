@@ -2,6 +2,8 @@
 
 ## MS SQL Server Change Data Capture For sqlcdc-stream
 
+![Database Configuration Screen](https://github.com/No9/sqlcdcmanager/master/images/databasescreen.png "Database Configuration Screen")
+
 This is an application to configure Change Data Capture (CDC) through a simple web interface.
 
 As this is SQL Server specific it will only run on windows with node.
@@ -29,14 +31,12 @@ The config file points to the local instance so if you are running sqlcdc on the
 "dbconnection" : "Driver={SQL Server Native Client 11.0};Server=NAME_OR_IP_OF_SQLSERVER;Database=master;Trusted_Connection={Yes}"
 ```
 
-![Install the redis for windows](https://github.com/MSOpenTech/Redis "Redis Windows")
-
 **Start Redis as per your requirements**
 If you are just running the sample then double click on the redis-server.exe 
 
 Start The Service
 ```
-node node_modules/sqlcdcmanager/index.js 
+sqlcdcmanager
 ``` 
 
 ##License

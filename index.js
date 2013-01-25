@@ -1,3 +1,4 @@
+#! /usr/bin/env node
 var broadway = require('broadway');
 var httpProxy = require('http-proxy');
 var winston = require('winston');

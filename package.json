@@ -1,6 +1,7 @@
 {
   "name": "sqlcdcmanager",
   "description": "Configuration Manager for MS SQL Server Change Data Capture For Node",
+   "bin": { "sqlcdcmanager": "index.js" },
   "tags": [
     "SQLServer",
     "MSSQL",
@@ -29,8 +30,10 @@
 	"request" : "2.9.203",	
 	"winston" : "0.6.2"
   },
+  "engines": { "node": "*" },
   "devDependencies" : {
     },
     "scripts" : {
   }
+  
 }
