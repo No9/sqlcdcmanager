@@ -1,6 +1,6 @@
 {
-  "name": "sqlcdc",
-  "description": "MS SQL Server Change Data Capture For Node",
+  "name": "sqlcdcmanager",
+  "description": "Configuration Manager for MS SQL Server Change Data Capture For Node",
   "tags": [
     "SQLServer",
     "MSSQL",
@@ -15,16 +15,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/No9/sqlcdc.git"
+    "url": "git://github.com/No9/sqlcdcmanager.git"
   },
   "bugs": {
-    "url": "https://github.com/No9/sqlcdc/issues"
+    "url": "https://github.com/No9/sqlcdcmanager/issues"
   },
   "dependencies": {
     "broadway" : "0.2.1",
     "director" : "1.0.11",
-	"node-sqlserver" : "0.1.0",
-	"hook.io" : "0.8.10",
+	"msnodesql" : "0.2.0",
 	"http-proxy" : "0.8.1",
 	"http-server": "0.4.1",
 	"request" : "2.9.203",	

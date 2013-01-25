@@ -12,7 +12,7 @@
   <table>
 	<tr><td class="heading">Name</td><td class="heading">Status</td></tr>
   {{#each database}}
-	<tr><td><a href="/config/database.html?name={{name}}&enabled={{cdcenabled}}">{{name}}</a></td><td class="rowimagecell"><img src="/config/assets/images/enabled{{cdcenabled}}.png" class="rowicon" /></td></tr>
+	<tr><td><a href="/config/database.html?name={{name}}&enabled={{cdcenabled}}">{{name}}</a></td><td class="rowimagecell"><a href="/config/database.html?name={{name}}&enabled={{cdcenabled}}"><img src="/config/assets/images/enabled{{cdcenabled}}.png" class="rowicon" /></a></td></tr>
   {{/each}}
   </table>
 </div>
@@ -36,7 +36,7 @@ class="enabled{{cdcenabled}}"
 				var html    = template(databases);			 
 				document.getElementById('databaselist').innerHTML =  html;
 			}
-			if(httpmenu.readyState == 4 && httpmenu.status =! 200){
+			if(httpmenu.readyState == 4 && httpmenu.status != 200){
 				alert('Create Database Failed' + httpmenu.responseText);
 			}
 			

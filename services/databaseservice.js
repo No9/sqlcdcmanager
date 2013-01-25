@@ -1,8 +1,7 @@
-var sql = require('node-sqlserver');
+var sql = require('msnodesql');
 var http = require('http');
 var director = require('director');
 var url = require('url');
-var hookio = require('hook.io'); 
 var winston = require('winston');
 var config = require('../config.json');
 
@@ -98,9 +97,9 @@ exports.init = function(done)
 		var conn_str = config.dbconnection.replace("Database=master", "Database=" + dbname); 
 		
 		var databasecdc = "";
-		var hookB = hookio.createHook({ name: "databaseservice" });
-			hookB.start();
-			hookB.on('hook::ready', function(){
+		/*var hookB = hookio.createHook({ name: "databaseservice" });
+			hookB.start();*/
+			//hookB.on('hook::ready', function(){
 		if(reqtype == "databasestatusupdate"){
 				if(status == "1"){
 					databasecdc = "EXEC sys.sp_cdc_enable_db";
@@ -147,7 +146,7 @@ exports.init = function(done)
 				_res.end(status);
 			});
 		});
-	});
+	//});
 }
 	
 	var router = new director.http.Router({

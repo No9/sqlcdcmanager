@@ -4,7 +4,6 @@ var winston = require('winston');
 var app = new broadway.App();
 app.use(require('./services/databaseservice'));
 app.use(require('./apps/cdcmanager/app'));
-app.use(require('./services/broadcastmanager'));
 var options = {
   router: {
     'localhost/services': '127.0.0.1:8000',
