@@ -2,7 +2,7 @@
 
 ## MS SQL Server Change Data Capture For sqlcdc-stream
 
-![Database Configuration Screen](https://github.com/No9/sqlcdcmanager/master/images/databasescreen.png "Database Configuration Screen")
+![Database Configuration Screen](https://raw.github.com/No9/sqlcdcmanager/master/images/databasescreen.png "Database Configuration Screen")
 
 This is an application to configure Change Data Capture (CDC) through a simple web interface.
 
